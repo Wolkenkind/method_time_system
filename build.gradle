@@ -1,0 +1,93 @@
+buildscript {
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath "org.openapitools:openapi-generator-gradle-plugin"
+	}
+}
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.0'
+	id 'io.spring.dependency-management' version '1.1.5'
+
+	id "org.openapi.generator" version '7.6.0'
+}
+
+group = 'com.t1.openschool.atumanov'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "$buildDir/apiGenerated/src/main/java"
+		}
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.data:spring-data-commons'
+
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
+
+	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.postgresql:postgresql'
+	implementation 'org.postgresql:r2dbc-postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test:3.6.6'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+task generateApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+	generatorName = "spring"
+	inputSpec = "$rootDir/src/main/resources/api_definition.yaml".toString()
+	outputDir = "$buildDir/apiGenerated".toString()
+	apiPackage = "com.t1.openschool.atumanov.homework_aop.controller"
+	modelPackage = "com.t1.openschool.atumanov.homework_aop"
+	configOptions = [
+			dateLibrary: "java8",
+			interfaceOnly: "false",
+			serializationLibrary: "jackson",
+			library: "spring-boot",
+			additionalModelTypeAnnotations: "@lombok.NoArgsConstructor @lombok.AllArgsConstructor @lombok.Generated",
+			openApiNullable: "false", // don't include https://github.com/OpenAPITools/jackson-databind-nullable dependency
+			useSpringBoot3: "true",
+			delegatePattern: "true"
+	]
+	groupId = 'com.t1.openschool.atumanov.generated'
+	id = 'statApi'
+	generateModelTests = true
+	generateModelDocumentation = true
+	generateApiTests = true
+	generateApiDocumentation = true
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+tasks.compileJava.dependsOn generateApi

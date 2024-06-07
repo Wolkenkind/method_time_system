@@ -1,0 +1,196 @@
+openapi: 3.0.0
+info:
+    title: Spring AOP Homework Statistics API
+    description: >
+        This is Statistics API specification written using OpenAPI specification. It elaborates on how to get statistic information from the method execution time measuring system.
+    contact:
+        email: a-tumanov@yandex.ru
+    version: 1.0.0
+servers:
+    - url: http://localhost/api/v3
+paths:
+    /stat/avg/sync:
+      get:
+        summary: Get average execution time for group of synchronous methods
+        description: Returns average execution time for all methods, marked as synchronous.
+        operationId: getAvgForSynchronous
+        parameters:
+          - $ref:  '#/components/parameters/ExecutionUnitParam'
+        responses: 
+          '200':
+            $ref:  '#/components/responses/GroupOperationSuccessfulResponse'
+          '500':
+            $ref:  '#/components/responses/InternalErrorResponse'
+    /stat/avg/async:
+      get:
+        summary: Get average execution time for group of asynchronous methods
+        description: Returns average execution time for all methods, marked as asynchronous.
+        operationId: getAvgForAsynchronous
+        parameters:
+          - $ref:  '#/components/parameters/ExecutionUnitParam'
+        responses: 
+          '200':
+            $ref:  '#/components/responses/GroupOperationSuccessfulResponse'
+          '500':
+            $ref:  '#/components/responses/InternalErrorResponse'
+    /stat/total/sync:
+      get:
+        summary: Get total execution time for group of synchronous methods
+        description: Returns total execution time for all methods, marked as synchronous.
+        operationId: getTotalForSynchronous
+        parameters:
+          - $ref:  '#/components/parameters/ExecutionUnitParam'
+        responses: 
+          '200':
+            $ref:  '#/components/responses/GroupOperationSuccessfulResponse'
+          '500':
+            $ref:  '#/components/responses/InternalErrorResponse'
+    /stat/total/async:
+      get:
+        summary: Get total execution time for group of asynchronous methods
+        description: Returns total execution time for all methods, marked as asynchronous.
+        operationId: getTotalForAsynchronous
+        parameters:
+          - $ref:  '#/components/parameters/ExecutionUnitParam'
+        responses: 
+          '200':
+            $ref:  '#/components/responses/GroupOperationSuccessfulResponse'
+          '500':
+            $ref:  '#/components/responses/InternalErrorResponse'
+    /stat/avg/method:
+      get: 
+        summary: Get average execution time for a method with a given name
+        description: |
+            Returns average execution time for a method with specified name
+
+            Fully qualified method name must be specified as a parameter, e.g. com.app.service.Method
+        operationId: getAvgForMethod
+        parameters: 
+          - $ref:  '#/components/parameters/MethodNameParam'
+          - $ref:  '#/components/parameters/SynchronicityParam'
+          - $ref:  '#/components/parameters/ExecutionUnitParam'
+        responses: 
+          '200':
+            $ref: '#/components/responses/MethodOperationSuccessfulResponse'
+          '500':
+            $ref: '#/components/responses/InternalErrorResponse'
+    /stat/total/method:
+      get: 
+        summary: Get total execution time for a method with a given name
+        description: |
+            Returns total execution time for a method with specified name
+
+            Fully qualified method name must be specified as a parameter, e.g. com.app.service.Method
+        operationId: getTotalForMethod
+        parameters: 
+          - $ref:  '#/components/parameters/MethodNameParam'
+          - $ref:  '#/components/parameters/SynchronicityParam'
+          - $ref:  '#/components/parameters/ExecutionUnitParam'
+        responses: 
+          '200':
+            $ref: '#/components/responses/MethodOperationSuccessfulResponse'
+          '500':
+            $ref: '#/components/responses/InternalErrorResponse'
+components:
+    schemas: 
+      GroupStatResult:
+        type: object
+        properties: 
+          methodType:
+            type: string
+            enum: 
+              - sync
+              - async
+            example: sync
+          statisticResultType:
+            type: string
+            enum: 
+              - avg
+              - total
+            example: total
+          statisticResult:
+            type: number
+            example: 332.6
+          resultUnits:
+            type: string
+            example: seconds
+      MethodStatResult:
+        type: object
+        properties:
+          methodName:
+            type: string
+            example: com.example.methods.MethodName
+          methodType:
+            type: string
+            enum: 
+              - all
+              - sync
+              - async
+            example: sync
+          statisticResultType:
+            type: string
+            enum:
+              - avg
+              - total
+            example: total
+          statisticResult:
+            type: number
+            example: 42.2
+          resultUnits:
+            type: string
+            example: seconds
+      ExecutionUnits:
+        type: string
+        enum: 
+          - minutes
+          - seconds
+          - milliseconds
+          - nanoseconds
+        default: milliseconds
+      SynchronicityFilter:
+        type: string
+        enum: 
+          - all
+          - sync
+          - async
+        default: all
+    parameters: 
+      ExecutionUnitParam:
+        name: unit
+        in: query
+        description: Unit of time measurement, can be 'minutes', 'seconds', 'milliseconds' or 'nanoseconds'
+        required: false
+        schema: 
+          $ref: '#/components/schemas/ExecutionUnits'
+        example: seconds
+      MethodNameParam:
+        name: name
+        in: query
+        description: Fully qualified name of the method to provide statistics for
+        required: true
+        schema: 
+          type: string
+        example: com.app.service.Method
+      SynchronicityParam:
+        name: sync
+        in: query
+        description: Synchronicity filter for method executions, can be 'all', 'sync' or 'async'
+        required: false
+        schema:
+          $ref: '#/components/schemas/SynchronicityFilter'
+        example: sync
+    responses: 
+      GroupOperationSuccessfulResponse:
+        description: successful operation
+        content: 
+          application/json: 
+            schema: 
+              $ref:  '#/components/schemas/GroupStatResult'
+      MethodOperationSuccessfulResponse:
+        description: successful operation
+        content: 
+          application/json: 
+            schema: 
+              $ref: '#/components/schemas/MethodStatResult'
+      InternalErrorResponse:
+        description: internal error
