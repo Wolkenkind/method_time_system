@@ -12,7 +12,7 @@ There is also an "internal" API that can be used to call methods, annotated for 
 
 In order to run this project...
 
-- you must have access to PostgreSQL instance and create database named `mdb` with owner `aopuser` (also database named `test` for running tests). `aopuser` should must have password `springaop`
+- you must have access to PostgreSQL instance and create database named `mdb` with owner `aopuser` (also database named `test` for running tests). `aopuser` must have password `springaop` (or you can modify application.properties as needed with your own credentials)
 - you should populate the database with some data first. You can add new method and call annotated methods from code, or you can use "internal" APIs that provide access to the annotated methods
 
 ## Method execution time API
